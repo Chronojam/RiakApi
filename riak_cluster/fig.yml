@@ -1,0 +1,26 @@
+riak01:
+  build: riak-node/
+  command: /etc/riak/run.sh
+  name: riak01
+  environment:
+    - RIAK_NODE_NAME=riak01
+    - RIAK_CLUSTER_ADDRESS=riak01
+  tty: True
+
+riak02:
+  build: riak-node/
+  command: /etc/riak/run.sh
+  name: riak02
+  environment:
+    - RIAK_NODE_NAME=riak02
+    - RIAK_CLUSTER_ADDRESS=riak02
+  tty: True
+
+riak03:
+  build: riak-node/
+  command: /etc/riak/run.sh
+  name: riak03
+  environment:
+    - RIAK_NODE_NAME=riak03
+    - RIAK_CLUSTER_ADDRESS=riak03
+  tty: True
