@@ -37,7 +37,7 @@ class BucketsItemProperties(restful.Resource):
     return bucket.get_properties()
 
 class BucketsItemKeys(restful.Resource):
-  # GET /bucket/<string:bucketid>/keys
+  # GET /api/buckets/<string:bucketid>/keys
   # get a list of keys associated with this bucket.
   def get(self, bucketid):
     bucket = client.bucket(bucketid)
@@ -46,21 +46,14 @@ class BucketsItemKeys(restful.Resource):
       ret_dict[key] = '{0}api/buckets/{1}/keys/{2}'.format(balancer_address, bucketid, key)
     return ret_dict
 
-  # POST /bucket/<string:bucketid>
+  # POST /api/buckets/<string:bucketid>/keys
   # add a bunch of keys and values to the bucket.
-  # { 'items' : [
-  #   { 'key' : 'value' } ]
-  # }
   def post(self, bucketid):
-    parser = reqparse.RequestParser()
-    parseclient.add_argument('items')
-    args = parseclient.parse_args()
     bucket = client.bucket(bucketid)
     if not 'items' in request.json:
       return { 'Error' : 'Missing items property from body' }, 401
     for item in request.json['items']:
       if not 'key' in item or not 'value' in item:
-        return item
         return { 'Error' : 'Bad Request' }, 400
     
       if bucket.get(item['key']).exists:
@@ -80,3 +73,15 @@ class BucketItemKeysValue(restful.Resource):
       return { 'Error' : 'No such key' }
     else:
       return { keyid : obj.encoded_data }
+
+  # POST /api/buckets/<string:bucketid>/keys/<keyid>
+  # create or update a key inside a bucket { 'value' : NEW_VALUE }
+  def post(self, bucketid, keyid):
+    bucket = client.bucket(bucketid)
+    obj = bucket.get(keyid)
+    if not 'value' in request.json:
+      return { 'Error' : 'Bad Request' }, 400
+    
+    obj = bucket.new(keyid, request.json['value'])
+    obj.store()
+    return "success"
